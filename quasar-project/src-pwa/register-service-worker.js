@@ -1,4 +1,5 @@
-import { register } from 'register-service-worker'
+import { register } from 'register-service-worker';
+import { Notify } from 'quasar';
 
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
@@ -10,9 +11,9 @@ register(process.env.SERVICE_WORKER_FILE, {
   // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
 
    registrationOptions: { scope: './' },
-/*
+
   ready (registration) {
-    console.log('Service worker is active.')
+    console.log('App is being served from cache by a service worker.');
   },
 
   registered (registration) {
@@ -28,15 +29,42 @@ register(process.env.SERVICE_WORKER_FILE, {
   },
 
   updated (registration) {
-    console.log('New content is available; please refresh.')
+    console.log('New content is available; please refresh.');
+    Notify.create({
+      color: 'green',
+      textColor: 'white',
+      message: `New version of ${process.env.APP_NAME} is available!`,
+      icon: 'cloud_download',
+      position: 'center',
+      timeout: 5000,
+      actions: [{
+        label: 'Refresh',
+        icon: 'refresh',
+        color: 'white',
+        handler: () => {
+          location.reload(true);
+        },
+      }],
+      onDismiss: () => {
+        location.reload(true);
+      },
+    });
   },
 
   offline () {
     console.log('No internet connection found. App is running in offline mode.')
+    Notify.create({
+      color: 'orange',
+      textColor: 'white',
+      message: `No internet connection found. ${process.env.APP_NAME} is running in offline mode.`,
+      icon: 'cloud_off',
+      position: 'center',
+      timeout: 2500,
+    });
   },
 
   error (error) {
     console.error('Error during service worker registration:', error)
   }
-  */
+
 })

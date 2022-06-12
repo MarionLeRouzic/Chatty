@@ -4,7 +4,7 @@
       <div id="logo" class="row justify-center items-center">
         <img
           alt="logo"
-          src="../assets/logo.png"
+          src="../assets/app-icon.png"
           width="150"
           height="150"
         >
@@ -60,8 +60,8 @@
     background radial-gradient(circle, #FFFEEE 0%, #FDBF89 100%)
 
   .card-auth
-    width 505px
-    height 560px
+    width 485px
+    height 540px
     background radial-gradient(circle, #FBE9CA 0%, #FBE9CA 100%)
 
   .tab-auth

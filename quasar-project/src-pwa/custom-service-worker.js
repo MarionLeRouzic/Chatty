@@ -5,6 +5,76 @@
  */
 
 import { precacheAndRoute } from 'workbox-precaching'
+import {registerRoute} from 'workbox-routing';
+import {StaleWhileRevalidate} from 'workbox-strategies';
+import {CacheFirst} from 'workbox-strategies';
+import {CacheableResponsePlugin} from 'workbox-cacheable-response';
+import {ExpirationPlugin} from 'workbox-expiration';
+import {Queue} from 'workbox-background-sync';
 
+let backgroundSyncSupported = 'sync' in self.registration ? true : false
 // Use with precache injection
 precacheAndRoute(self.__WB_MANIFEST)
+
+registerRoute(
+  ({url}) => url.origin === 'https://fonts.gstatic.com',
+  new StaleWhileRevalidate({
+    cacheName: 'google-fonts-stylesheets',
+  })
+);
+
+let createPostQueue = null
+if (backgroundSyncSupported) {
+  console.log("backgroundSync")
+  createPostQueue = new Queue('createPostQueue', {
+    onSync: async ({queue}) => {
+      let entry;
+      while (entry = await queue.shiftRequest()) {
+        try {
+
+          await fetch(entry.request);
+          console.log('Replay successful for request', entry.request)
+
+          const channel = new BroadcastChannel('sw-messages')
+          channel.postMessage({msg: 'offline-post-uploaded'})
+
+        } catch (error) {
+          console.log('Replay failed for request', entry.request, error)
+
+          // Put the entry back in the queue and re-throw the error:
+          await queue.unshiftRequest(entry);
+          throw error;
+        }
+      }
+      console.log('Replay complete!');
+    }
+  })
+}
+
+if (backgroundSyncSupported) {
+
+  self.addEventListener('fetch', (event) => {
+
+    if (event.request.url.endsWith('/createPost')) {
+
+      const promiseChain = fetch(event.request.clone()).catch((err) => {
+        return createPostQueue.pushRequest({request: event.request})
+      })
+      event.waitUntil(promiseChain)
+    }
+
+  })
+}
+
+/*
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open('pwa').then(cache => {
+      return cache.addAll([
+        '/',
+
+      ])
+    })
+  )
+});
+*/

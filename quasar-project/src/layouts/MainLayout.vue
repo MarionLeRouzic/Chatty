@@ -22,6 +22,41 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-footer elevated >
+      <div
+        v-if="showAppInstallBanner"
+        class="banner-container bg-primary">
+        <div class="constrain">
+          <q-banner
+            inline-actions
+            dense
+            class="bg-primary text-white">
+            <strong>Install Chatty?</strong>
+            <template v-slot:action>
+              <q-btn
+                flat
+                @click="installApp"
+                label="Yes"
+                class="q-px-sm"
+                dense />
+              <q-btn
+                flat
+                @click="showAppInstallBanner = false"
+                label="Later"
+                class="q-px-sm"
+                dense />
+              <q-btn
+                flat
+                @click="neverShowAppInstallBanner"
+                label="Never"
+                class="q-px-sm"
+                dense />
+            </template>
+          </q-banner>
+        </div>
+      </div>
+    </q-footer>
   </q-layout>
 </template>
 
@@ -31,8 +66,14 @@ import { mapState, mapActions } from 'vuex'
 
 import mixinOtherDetails from '../mixins/mixin-other-user-details.js'
 
+let deferredPrompt
 export default defineComponent({
 
+  data () {
+    return {
+      showAppInstallBanner: false
+    }
+  },
   mixins: [mixinOtherDetails],
   computed: {
     ...mapState('storage', ['userDetails']),
@@ -44,7 +85,40 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions('storage', ['logoutUser'])
+    ...mapActions('storage', ['logoutUser']),
+    installApp() {
+      this.showAppInstallBanner = false
+      deferredPrompt.prompt()
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('accepted')
+        } else {
+          console.log('rejected')
+        }
+      })
+    },
+    neverShowAppInstallBanner() {
+      this.showAppInstallBanner = false
+      this.$q.localStorage.set('neverShowAppInstallBanner', true)
+    }
+  },
+  mounted() {
+
+    let neverShowAppInstallBanner = this.$q.localStorage.getItem('neverShowAppInstallBanner')
+
+    if (!neverShowAppInstallBanner) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        this.showAppInstallBanner = true
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      this.showAppInstallBanner = true
+    });
   }
 
 })
