@@ -1,0 +1,40 @@
+{
+  "users": {
+    "USERID1": {
+      "name": "Marco",
+      "email": "marco@polo.com",
+      "online": true
+    },
+    "USERID2": {
+      "name": "Pablo",
+      "email": "pablo@narcos.com",
+      "online": true
+    }
+  },
+  "chats" : {
+    "USERID1": {
+      "USERID2": {
+        "MESSAGEID1": {
+          "text": "Salut mec je suis dans le JSON",
+          "from": "them"
+        },
+        "MESSAGEID2": {
+          "text": "Jure moi aussi",
+          "from": "me"
+        }
+      }
+    },
+    "USERID2": {
+      "USERID1": {
+        "MESSAGEID1": {
+          "text": "Salut mec je suis dans le JSON",
+          "from": "me"
+        },
+        "MESSAGEID2": {
+          "text": "Jure moi aussi",
+          "from": "them"
+        }
+      }
+    }
+  }
+}
